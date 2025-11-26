@@ -41,8 +41,8 @@ chrome.runtime.onMessage.addListener((message, sender, sendResponse) => {
     chrome.downloads.download(
       {
         url: message.url,
-        filename: message.filename,
-        saveAs: true,
+        filename: `AudioRecorder/recording-${Date.now()}.mp3`,
+        saveAs: false,
       },
       (downloadId) => {
         if (chrome.runtime.lastError) {
