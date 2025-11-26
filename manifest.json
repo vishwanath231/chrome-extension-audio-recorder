@@ -1,0 +1,26 @@
+{
+  "manifest_version": 3,
+  "name": "Audio Recorder",
+  "version": "1.0",
+  "description": "Record audio from tab and microphone",
+  "permissions": [
+    "tabCapture",
+    "offscreen",
+    "downloads",
+    "storage",
+    "activeTab"
+  ],
+  "host_permissions": ["<all_urls>"],
+  "action": {
+    "default_popup": "popup.html"
+  },
+  "background": {
+    "service_worker": "background.js"
+  },
+  "web_accessible_resources": [
+    {
+      "resources": ["offscreen.html", "lib/lame.min.js"],
+      "matches": ["<all_urls>"]
+    }
+  ]
+}

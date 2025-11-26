@@ -1,0 +1,54 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <title>Enable Microphone Access</title>
+  <style>
+    body {
+      font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      height: 100vh;
+      margin: 0;
+      background-color: #f0f2f5;
+      color: #333;
+    }
+    .container {
+      background: white;
+      padding: 2rem;
+      border-radius: 8px;
+      box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+      text-align: center;
+      max-width: 400px;
+    }
+    h1 { margin-top: 0; color: #1a73e8; }
+    p { line-height: 1.5; color: #5f6368; }
+    button {
+      background-color: #1a73e8;
+      color: white;
+      border: none;
+      padding: 12px 24px;
+      border-radius: 4px;
+      font-size: 16px;
+      cursor: pointer;
+      margin-top: 20px;
+      transition: background-color 0.2s;
+    }
+    button:hover { background-color: #1557b0; }
+    .success { color: #188038; display: none; margin-top: 20px; font-weight: bold; }
+    .error { color: #d93025; display: none; margin-top: 20px; }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <h1>Microphone Access</h1>
+    <p>To record your voice during meetings, this extension needs permission to access your microphone.</p>
+    <p>Click the button below to grant permission.</p>
+    <button id="requestBtn">Enable Microphone</button>
+    <div id="successMsg" class="success">Microphone access granted! You can close this tab.</div>
+    <div id="errorMsg" class="error"></div>
+  </div>
+  <script src="permissions.js"></script>
+</body>
+</html>
