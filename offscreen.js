@@ -3,6 +3,8 @@ let audioContext = null;
 let mediaStream = null;
 let mp3Encoder = null;
 let dataBuffer = [];
+let socket = null;
+const WS_URL = "ws://localhost:8000/audio";
 
 chrome.runtime.onMessage.addListener(async (message) => {
   if (message.type === "start-recording") {
@@ -58,6 +60,15 @@ function resetRecording() {
   mediaStream = null;
   mp3Encoder = null;
   dataBuffer = [];
+
+  if (socket) {
+    try {
+      socket.close();
+    } catch (e) {
+      console.warn("Error closing socket:", e);
+    }
+    socket = null;
+  }
 
   console.log("Recording state reset");
 }
@@ -119,7 +130,7 @@ async function startRecording(streamId) {
     }
 
     // Mix streams
-    audioContext = new AudioContext();
+    audioContext = new AudioContext({ sampleRate: 16000 });
 
     // Ensure context is running (fix for "empty audio" if context was suspended)
     if (audioContext.state === "suspended") {
@@ -145,7 +156,7 @@ async function startRecording(streamId) {
     // Initialize MP3 Encoder
     // lamejs expects 16-bit integers, so we need to convert float samples
     const channels = 1; // Mono for simplicity, or 2 for stereo
-    const sampleRate = 44100; // Standard sample rate
+    const sampleRate = 16000; // Standard sample rate for Vosk
     const kbps = 128;
 
     mp3Encoder = new lamejs.Mp3Encoder(channels, sampleRate, kbps);
@@ -190,6 +201,30 @@ async function startRecording(streamId) {
     };
 
     console.log("Recording started successfully");
+
+    // Initialize WebSocket
+    try {
+      socket = new WebSocket(WS_URL);
+      socket.onopen = () => {
+        console.log("WebSocket connected");
+      };
+      socket.onerror = (error) => {
+        console.error("WebSocket error:", error);
+      };
+      socket.onclose = () => {
+        console.log("WebSocket closed");
+      };
+      socket.onmessage = (event) => {
+        console.log("WebSocket message received:", event.data);
+        chrome.runtime.sendMessage({
+          action: "websocket_message",
+          text: event.data,
+        });
+      };
+    } catch (e) {
+      console.error("Failed to create WebSocket:", e);
+    }
+
     const statusMessage = micStream
       ? "Recording (Tab + Microphone)..."
       : "Recording (Tab audio only - mic unavailable)...";
@@ -245,6 +280,11 @@ function convertAndEncode(floatSamples) {
     samples[i] = s < 0 ? s * 0x8000 : s * 0x7fff;
   }
 
+  // Send PCM data to WebSocket
+  if (socket && socket.readyState === WebSocket.OPEN) {
+    socket.send(samples.buffer);
+  }
+
   // Encode
   const mp3Data = mp3Encoder.encodeBuffer(samples);
   if (mp3Data.length > 0) {
@@ -275,40 +315,44 @@ function stopRecording() {
   }
 
   // Finalize MP3
-  const mp3Data = mp3Encoder.flush();
-  if (mp3Data.length > 0) {
-    dataBuffer.push(mp3Data);
-  }
+  // const mp3Data = mp3Encoder.flush();
+  // if (mp3Data.length > 0) {
+  //   dataBuffer.push(mp3Data);
+  // }
 
   // Create Blob
-  const blob = new Blob(dataBuffer, { type: "audio/mp3" });
+  // const blob = new Blob(dataBuffer, { type: "audio/mp3" });
 
   // Convert Blob to Data URL to pass to background script
-  const reader = new FileReader();
-  reader.onload = function () {
-    const dataUrl = reader.result;
+  // const reader = new FileReader();
+  // reader.onload = function () {
+  //   const dataUrl = reader.result;
 
-    // Send to background to download
-    chrome.runtime.sendMessage({
-      action: "download_file",
-      url: dataUrl,
-      filename: "recording.mp3",
-    });
+  //   // Send to background to download
+  //   chrome.runtime.sendMessage({
+  //     action: "download_file",
+  //     url: dataUrl,
+  //     filename: "recording.mp3",
+  //   });
 
-    // Cleanup
-    recorder = null;
-    audioContext = null;
-    mediaStream = null;
-    mp3Encoder = null;
-    dataBuffer = [];
+  // Cleanup
+  recorder = null;
+  audioContext = null;
+  mediaStream = null;
+  mp3Encoder = null;
+  dataBuffer = [];
+  if (socket) {
+    socket.close();
+    socket = null;
+  }
 
-    console.log("Recording stopped and sent for download");
+  console.log("Recording stopped");
 
-    // Notify popup
-    chrome.runtime.sendMessage({
-      action: "update_status",
-      text: "Recording saved!",
-    });
-  };
-  reader.readAsDataURL(blob);
+  // Notify popup
+  chrome.runtime.sendMessage({
+    action: "update_status",
+    text: "Recording stopped",
+  });
+  // };
+  // reader.readAsDataURL(blob);
 }

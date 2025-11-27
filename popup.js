@@ -153,6 +153,11 @@ document.addEventListener("DOMContentLoaded", () => {
         statusBadge.textContent = "Error";
         statusBadge.title = message.text;
       }
+    } else if (message.action === "websocket_message") {
+      const responseContainer = document.getElementById("response-container");
+      if (responseContainer) {
+        responseContainer.textContent = message.text;
+      }
     }
   });
 });
