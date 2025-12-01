@@ -147,15 +147,36 @@ document.addEventListener("DOMContentLoaded", () => {
   // Listen for status updates from background
   chrome.runtime.onMessage.addListener((message) => {
     if (message.action === "update_status") {
-      // Only update text if not recording (to avoid overwriting "Recording" badge)
-      // or if it's an error message
+      statusBadge.textContent = message.text;
+
       if (message.text.startsWith("Error")) {
-        statusBadge.textContent = "Error";
+        statusBadge.style.backgroundColor = "#ffebee";
+        statusBadge.style.color = "#c62828";
         statusBadge.title = message.text;
+      } else if (message.text === "Processing...") {
+        statusBadge.style.backgroundColor = "#fff3cd"; // Yellow
+        statusBadge.style.color = "#856404";
+      } else if (message.text === "Speaking...") {
+        statusBadge.style.backgroundColor = "#d1e7dd"; // Green
+        statusBadge.style.color = "#0f5132";
+      } else if (message.text === "Listening...") {
+        statusBadge.style.backgroundColor = "#e2e3e5"; // Grey/Default
+        statusBadge.style.color = "#383d41";
+      } else {
+        // Default recording state
+        statusBadge.style.backgroundColor = "#ffebee"; // Red for recording
+        statusBadge.style.color = "#c62828";
       }
     } else if (message.action === "websocket_message") {
       const responseContainer = document.getElementById("response-container");
       if (responseContainer) {
+        responseContainer.style.marginTop = "20px";
+        responseContainer.style.padding = "10px";
+        responseContainer.style.backgroundColor = "#fff";
+        responseContainer.style.borderRadius = "8px";
+        responseContainer.style.boxShadow = "0 2px 8px rgba(0,0,0,0.05)";
+        responseContainer.style.minHeight = "50px";
+        responseContainer.style.wordWrap = "break-word";
         responseContainer.textContent = message.text;
       }
     }

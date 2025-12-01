@@ -46,6 +46,7 @@
       display: flex;
       flex-direction: column;
       gap: 10px;
+      align-items: center;
     }
     button {
       width: 100%;
@@ -115,6 +116,20 @@
     .hidden {
       display: none !important;
     }
+    .record-btn {
+      width: 64px !important;
+      height: 64px !important;
+      border-radius: 50%;
+      padding: 0;
+    }
+    .record-btn svg {
+      width: 32px;
+      height: 32px;
+    }
+    .record-btns {
+      display: flex;
+      gap: 10px;
+    }
   </style>
 </head>
 <body>
@@ -132,14 +147,18 @@
   </div>
 
   <div class="controls">
-    <button id="startBtn">Start Recording</button>
-    <button id="stopBtn" disabled>Stop Recording</button>
+    <div class="record-btns">
+      <button id="startBtn" class="record-btn">
+      <svg viewBox="0 0 24 24" width="24" height="24" stroke="currentColor" stroke-width="2" fill="none" stroke-linecap="round" stroke-linejoin="round"><path d="M12 1a3 3 0 0 0-3 3v8a3 3 0 0 0 6 0V4a3 3 0 0 0-3-3z"></path><path d="M19 10v2a7 7 0 0 1-14 0v-2"></path><line x1="12" y1="19" x2="12" y2="23"></line><line x1="8" y1="23" x2="16" y2="23"></line></svg>
+    </button>
+    <button id="stopBtn" class="record-btn" disabled>
+      <svg viewBox="0 0 24 24" width="24" height="24" stroke="currentColor" stroke-width="2" fill="currentColor" stroke-linecap="round" stroke-linejoin="round"><rect x="6" y="6" width="12" height="12"></rect></svg>
+    </button>
+    </div>
     <button id="resetBtn">Reset State</button>
   </div>
 
-  <div id="response-container" style="margin-top: 20px; padding: 10px; background: #fff; border-radius: 8px; box-shadow: 0 2px 8px rgba(0,0,0,0.05); min-height: 50px; word-wrap: break-word;">
-    Waiting for response...
-  </div>
+  <div id="response-container"></div>
 
   <script src="popup.js"></script>
 </body>
